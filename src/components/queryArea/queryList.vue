@@ -1,6 +1,12 @@
 <template>
     <div class="queryArea">
-        <el-input :placeholder="area.name" v-model="names" ></el-input>
+        <el-select v-model="names" :placeholder="area.name">
+           <el-option v-for="item in area.options" 
+           :key="item.value" 
+           :label="item.label"
+           :value="item.value">
+           </el-option>
+        </el-select>
         <el-input :placeholder="area.code" v-model="codes" ></el-input>
         <el-button size="medium" type="primary" @click="query">查询</el-button>
     </div>
@@ -9,8 +15,8 @@
 export default {
   props: {
     area: {
-      name: "",
-      code: ""
+      code: "",
+      options:[]
     }
   },
   data() {
