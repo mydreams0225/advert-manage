@@ -177,7 +177,8 @@
 <script>
 import query from "@/components/queryArea/queryAd";
 import paging from "@/components/common/paging";
-import { reqAdEleList,reqEditadEle,reqAddadEle } from "@/api/advertManage/adEle";
+import { reqAdEleList,reqEditadEle,reqAddadEle,reqRemoveELe } 
+from "@/api/advertManage/adEle";
 export default {
   data() {
     return {
@@ -222,10 +223,11 @@ export default {
     querys(name) {
       var _this = this;
       let para = {
-        name: name,
+        adverteletype: name,
         currentPage: this.totals.currentPage,
         pageSize: this.totals.pageSize,
-        token: window.localStorage.getItem("token")
+        token: window.localStorage.getItem("token"),
+        userId:window.localStorage.getItem("username")
       };
       reqAdEleList(para)
         .then(res => {
@@ -260,14 +262,41 @@ export default {
       this.dialog.title = "修改广告元素";
       this.dialog.list = row;
     },
-    deleteRow() {},
+    deleteRow(index,id) {
+         let  _this = this;
+        this.$confirm("确认删除该记录吗?", "提示", {
+        type: "warning"
+      })
+        .then(() => {
+          let para = {
+            shopno: id, 
+            token: window.localStorage.getItem("token")
+          };
+          reqRemoveELe(para).then(res => {
+            if (res.status === 200) {
+              this.$message({
+                message: "删除成功",
+                type: "success"
+              });
+            } else if (res.status === 202) {
+              _this.common.tokenCheck(_this);
+            }
+            this.querys();
+          });
+        })
+        .catch(() => {
+             _this.$message.error("请求超时，请重新发送请求");
+              _this.dialog.loading = false;
+              return false;
+        });
+    },
     submit(formName){
          this.dialog.loading = true;
       var _this = this;
       this.$refs[formName].validate(valid => {
         if(valid){
           let para= {
-            
+             
           }
            this.reqData(this.list.title ,para);
         }else{
@@ -333,7 +362,7 @@ export default {
     addClick() {
       this.dialog.dialogVisible = true;
       this.dialog.title = "添加广告元素";
-      this.dialog.list = row;
+      this.dialog.list = {};
     }
   },
   components: {

@@ -42,9 +42,9 @@
                         </el-col>
                         <el-col class="showDate" :span="18">
                             <span >时间：</span>
-                            <el-button type="primary" size="mini">7日</el-button>
-                            <el-button type="primary" size="mini">10日</el-button>
-                            <el-button type="primary" size="mini">15日</el-button>
+                            <el-button type="primary" size="mini" @click="day7">7日</el-button>
+                            <el-button type="primary" size="mini" @click="day10">10日</el-button>
+                            <el-button type="primary" size="mini" @click="day15">15日</el-button>
                         </el-col>
                     </el-row>
                 </div>
@@ -56,17 +56,18 @@
     </section>
 </template>
 <script>
+import { reqfinaState, reqfsTable } from "@/api/moneyManage/financial";
 export default {
   data() {
     return {
-        colors: ["#FFA54F","#63B8FF", "#CD69C9"],
+      colors: ["#FFA54F", "#63B8FF", "#CD69C9"],
       list: [
         { mount: "1", name: "广告位" },
-        { mount: "0元·", name: "今日收益" }
+        { mount: "0元", name: "今日收益" }
       ],
+      data: "-6",
       mychart: {
-          
-        legendData: ["曝光", "点击","包日"],
+        legendData: ["曝光", "点击", "包日"],
         axxisData: [
           "6-11周一",
           "6-12周二",
@@ -76,16 +77,108 @@ export default {
           "6-16周六",
           "6-17周日"
         ],
-        expData: [2,2,2],
-        clickData: [1,1,1],
-        dayData: [4,4,4]
+        expData: [2, 2, 2],
+        clickData: [1, 1, 1],
+        dayData: [4, 4, 4]
       }
     };
   },
-  mounted(){
-      this.initChart();
+  created() {
+    var data = this.areacolumn;
+    this.myChartData(data);
+  },
+  mounted() {
+    this.initChart();
+    this.query();
+    this.queryTop();
   },
   methods: {
+    queryTop() {
+      let para = {
+        //用户id
+        token: window.localStorage.getItem("token")
+      };
+      reqfsTable(para)
+        .then(res => {
+          if (res.status === 200) {
+            let lists = res.list;
+            lists.length !== 0 ? this.loopfsTable(lists) : "";
+          } else if (res.status === 202) {
+            _this.common.tokenCheck(_this);
+          }
+        })
+        .catch(() => {
+          this.$message.error("请求超时，请重新发送请求");
+          this.tableLoading = false;
+          return false;
+        });
+    },
+    loopfsTable(list) {
+      list.forEach(item => {
+          var temp = {
+               
+          };
+           this.list.push(temp);
+      });
+    },
+    query() {
+      let para = {
+        data: this.data,
+        token: window.localStorage.getItem("token")
+      };
+
+      reqfinaState(para)
+        .then(res => {
+          this.areacolumn = [];
+          if (res.status === 200) {
+            var list = res.list;
+            list.length !== 0 ? this.loopItem(list) : "";
+            // this.loopItem(list);
+          } else if (res.status === 202) {
+            _this.common.tokenCheck(_this);
+          }
+        })
+        .catch(() => {
+          this.$message.error("请求超时，请重新发送请求");
+          this.tableLoading = false;
+          return false;
+        });
+    },
+    loopItem(list) {
+      list.forEach(item => {
+        var temp = {};
+        this.areacolumn.push(temp);
+      });
+    },
+    day7() {
+      this.data = "-6";
+      this.query();
+    },
+    day10() {
+      this.data = "-9";
+      this.query();
+    },
+    day15() {
+      this.data = "-14";
+      this.query();
+    },
+    myChartData(data) {
+      var data = data || [];
+      if (data.length !== 0) {
+        data.forEach(item => {
+          this.mychart.axxisData.push(item.citySimpleName);
+          this.mychart.entrysData.push(item.entrSum);
+          this.mychart.outsData.push(item.outSum);
+          //   this.mychart.pieaxxisData.push({value:(item.entrSum+item.outSum)+","+name+":"+item.citySimpleName})
+          var obj = {};
+          obj.value = item.entrSum - 0 + item.outSum;
+          obj.name = item.citySimpleName;
+          console.log(obj);
+
+          this.mychart.pieaxxisData.push(obj);
+        });
+      }
+    },
     initChart() {
       let myChart = echarts.init(document.getElementById("myChart"));
       myChart.setOption({

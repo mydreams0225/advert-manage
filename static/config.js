@@ -19,8 +19,8 @@
 const configs = {
     // sy   base: "http://192.168.0.105:8081/park",
     //pf
-    login: "http://192.168.0.111:8065",
-    base: "http://192.168.0.111:8065",
+    login: "http://192.168.0.112:8088",
+    base: "http://192.168.0.117:8093",
     //地区
     options: [
         {
@@ -14798,8 +14798,28 @@ const configs = {
             "label": "澳门特别行政区"
         }
     ],
-   
 
+    // 广告管理系统
+    ggwType: [{ value: "01", label: "开屏广告" }],
+    ggwCategory: [
+        { value: "01", label: "停车场" },
+        { value: "02", label: "APP应用" }
+    ],
+
+    feeMethod: [{ value: "CPM", label: "CPM" },
+    { value: "CPC", label: "CPC" }, { value: "CPT", label: "CPT" }],
+    auditStatus: [
+        { value: "0", label: "待审核" },
+        { value: "1", label: "可用" },
+        { value: "2", label: "审核通过" },
+        { value: "3", label: "审核不通过" },
+        { value: "4", label: "审批通过" }],
+    parkType: [{ value: "01", label: "商业综合体" }, { value: "02", label: "房地产小区" },
+    { value: "03", label: "办公写字楼" }, { value: "04", label: "医院" },
+    { value: "05", label: "旅游度假区" }, { value: "06", label: "休闲娱乐" }
+    ]
+
+    // 广告管理系统
 }
 const businessObj = {
     sellersTradeType: [{ value: "1", label: "行业一" }, { value: "2", label: "行业二" }],
@@ -16383,8 +16403,8 @@ const businessObj = {
 
 //广告主
 const advertlists = {
-    identity:[
+    identity: [
         { value: "1", label: "广告主" },
         { value: "2", label: "代理商" }
-      ]
+    ]
 }

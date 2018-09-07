@@ -193,7 +193,9 @@ export default {
               window.localStorage.removeItem("userRole");
               window.localStorage.removeItem("userInfo");
               window.localStorage.removeItem("token");
+              window.localStorage.removeItem("username")
               window.localStorage.removeItem("isLoadNodes");
+              window.localStorage.removeItem("identity");
               _this.$router.push({ path: "/login" });
             },
             error: function(error) {
@@ -269,7 +271,7 @@ export default {
       type: "post",
       data: { token: window.localStorage.getItem("token") },
       //  url: "../../static/json/rolelist.json",
-      url: `${configs.login}/jwt/checkToken1111`,
+      url: `${configs.login}/jwt/checkToken`,
       // url:`${configs.base}/index` ,
       // dataType: "jsonp",
       success: function(data) {
@@ -283,6 +285,7 @@ export default {
           _this.$router.push({ path: "/login" });
         } else {
           window.localStorage.setItem("token", data.token);
+          window.localStorage.setItem("identitys", data.data.identity );
           window.localStorage.setItem("user", data.data);
           console.log("用户信息");
           console.log(data);

@@ -220,7 +220,8 @@
 
 <script>
 import query from "@/components/queryArea/queryDate";
-import { reqLaunchPlan,reqRemovePlan,reqEditPlanList,reqAddPlanList } from "@/api/launchPlan/lplist";
+import { reqLaunchPlan,reqRemovePlan,reqEditPlanList,reqAddPlanList } 
+from "@/api/launchPlan/lplist";
 import paging from "@/components/common/paging";
 export default {
   data() {

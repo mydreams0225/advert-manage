@@ -125,15 +125,14 @@ export default {
           loginParams.append("password", this.ruleForm2.checkPass);
           //jsonp
           $.ajax({
-            type: "get",
+            type: "post",
             data: {
               username: _this.ruleForm2.account,
               password: _this.ruleForm2.checkPass,
-              proId: "sys_004"
+              proId: "sys_002"
             },
-
-            //  url: `${configs.login}/jwt/login`,
-              url: "../../static/json/rolelist.json",
+              url: `${configs.login}/jwt/login`,
+              // url: "../../static/json/rolelist.json",
             // jsonpCallback: "showData",
             // dataType: "jsonp",
             success: function(data) {

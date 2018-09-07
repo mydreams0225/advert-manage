@@ -61,7 +61,10 @@
 </template>
 <script>
 import paging from "@/components/common/paging";
-import { reqRechargeList,reqRemoveReList } from "@/api/moneyManage/queryRecharge";
+import {
+  reqRechargeList,
+  reqRemoveReList
+} from "@/api/moneyManage/queryRecharge";
 export default {
   data() {
     return {
@@ -79,21 +82,46 @@ export default {
   },
   methods: {
     query() {
-      this.List = [
-        {
-          rechargeFlowId: "1",
-          adrId: "2",
-          rechargeMoney: "50",
-          rechargeDate: ""
-        }
-      ];
+      var _this = this;
+      // this.List = [
+      //   {
+      //     rechargeFlowId: "1",
+      //     adrId: "2",
+      //     rechargeMoney: "50",
+      //     rechargeDate: ""
+      //   }
+      // ];
       let para = {
         pageSize: this.totals.pageSize,
         currentPage: this.totals.currentPage,
 
         token: window.localStorage.getItem("token")
       };
-      reqRechargeList(para).then(res => {});
+      _this.tableLoading = true;
+      reqRechargeList(para)
+        .then(res => {
+          this.list=[];
+          if (res.status === 200) {
+               let list = res.list;
+              list.lenght!==0 || list !=null ? loopItemQ(list) :"";
+          } else if (res.status === 202) {
+            _this.common.tokenCheck(_this);
+          }
+          _this.tableLoading= false;
+        })
+        .catch(() => {
+          _this.$message.error("请求超时，请重新发送请求");
+          _this.tableLoading = false;
+          return false;
+        });
+    },
+    loopItemQ(list){
+         list.forEach(item=>{
+           var temp ={
+
+           };
+           this.list.push(temp);
+         })
     },
     deleteRow(rechargeFlowId) {
       let _this = this;
