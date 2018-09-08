@@ -4,6 +4,7 @@
         <el-date-picker
             v-model="names"
             type="date"
+            value-format="yyyyMMdd"
            :placeholder="area.name">
         </el-date-picker>
         
@@ -19,7 +20,7 @@ export default {
   },
   data() {
     return {
-      names: new Date(),
+      names:""
     };
   },
   methods:{

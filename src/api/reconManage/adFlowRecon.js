@@ -1,10 +1,9 @@
 import $axios from 'axios';
 import qs from 'qs';
 let base = configs.base;
-
-// 1、查询 reqAdvertList  
-export const reqAdClickFlow = params => {
-    return $axios.post(`${base}/tm/adclick/list`,
+// reqGgwManage 查询
+export const reqAdFlow = params => {
+    return $axios.post(`${base}/partner/account/list`,
         qs.stringify(params, { indices: false }),
         {  // 这里是跨域写法  
             headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", }  // 这里是跨域的写法  

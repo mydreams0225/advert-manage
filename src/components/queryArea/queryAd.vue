@@ -15,6 +15,7 @@ export default {
   props: {
     area: {
       name: "",
+
     }
   },
   data() {
@@ -34,7 +35,7 @@ export default {
         float: right;
         display: inline-block;
     }
-    .queryAd .el-input {
+    .queryAd .el-input,  .queryAd.el-select {
         width: 200px;
     }
 </style>

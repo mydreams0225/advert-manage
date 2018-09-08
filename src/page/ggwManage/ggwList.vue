@@ -163,8 +163,10 @@
                     :visible.sync="QRcode.dialogVisible"
                     :close-on-click-modal="false"
                     width="350px"
-                    height="520px">
-                    <div class="qrcode">
+                    height="520px"
+                     @open="openQrCode"
+                    >
+                    <div class="qrcode" v-loading="QRcode.qrLoading">
                         
                         <div id="qrcode"></div>
                     </div>
@@ -226,7 +228,8 @@ export default {
       },
       QRcode: {
         title: "",
-        dialogVisible: false
+        dialogVisible: false,
+        qrLoading:false
       },
       rules: {
         ggwName: [
@@ -263,7 +266,6 @@ export default {
 
       reqGGWList(para)
         .then(res => {
-          debugger;
           this.list = [];
           if (res.status === 200) {
             let list = res.data.list;
@@ -350,44 +352,49 @@ export default {
       this.dialog.dialogVisible = true;
       this.dialog.title = "查看详情";
     },
+   qrCode(data) {
+     var data = data || "http://www.baidu.com";
+      var _this = this;
+      console.log($("#qrcode"));
+      $("#qrcode").qrcode({
+        render: "canvas",
+        text: data,
+        width: "200", //二维码的宽度
+        height: "200", //二维码的高度
+        background: "#ffffff", //二维码的后景色
+        foreground: "#000000", //二维码的前景色
+        src: "img/gray.jpg" //二维码中间的图片
+      });
+    },
+
     // 点击查看广告
     lookAdClick(ggwId) {
-      // let para = {
-      //   token: this.token,
-      //   advertpositionnum: ggwId
-      // };
-      // reqQRcode(para).then(res=>{
-      //   if(res.status===200){
-      //     $('#qrcode').qrcode({
-      //       render: "canvas",
-      //       text: res.data ,
-      //       width: "200",               //二维码的宽度
-      //       height: "200",              //二维码的高度
-      //       background: "#ffffff",       //二维码的后景色
-      //       foreground: "#000000",        //二维码的前景色
-      //       src: 'img/gray.jpg'             //二维码中间的图片
-      //   });
-      //   }
-      // })
-      this.qrCode();
+      this.QRcode.ggwId = ggwId;
+      var _this = this;
+      this.QRcode.qrLoading=true;
+      this.QRcode.dialogVisible = true;
     },
-    qrCode() {
-      var _this=this;
-      // $("#qrcode").qrcode({
-      //       render: "table",
-      //       text: "http://www.baidu.com?id=",
-      //       width: "200", //二维码的宽度
-      //       height: "200", //二维码的高度
-      //       background: "#ffffff", //二维码的后景色
-      //       foreground: "#000000", //二维码的前景色
-      //       src: "img/gray.jpg" //二维码中间的图片
-      //     });
-       var qrcodes= document.getElementById('qrcode')
-      QRCodes.toCanvas(qrcodes, "http://www.baidu.com", function(error) {
-        if (error) console.error(error);
-        console.log("success!");
-         _this.QRcode.dialogVisible = true;
-      });
+    
+      //DIALOG打开
+    openQrCode() {
+      var _this = this;
+      $(".qrcode canvas").remove();
+      let para = {
+        token: this.token,
+        advertpositionnum: this.QRcode.ggwId
+      };
+      reqQRcode(para)
+        .then(res => {
+          if (res.status === 200) {
+            _this.qrCode(res.data);
+            this.QRcode.qrLoading = false;
+          }
+        })
+        .catch(() => {
+          _this.qrCode();
+          _this.QRcode.qrLoading = false;
+          console.log("zlz");
+        });
     },
 
     //点击添加按钮

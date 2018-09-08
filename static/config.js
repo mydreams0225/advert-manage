@@ -20,7 +20,7 @@ const configs = {
     // sy   base: "http://192.168.0.105:8081/park",
     //pf
     login: "http://192.168.0.112:8088",
-    base: "http://192.168.0.117:8093",
+    base: "http://192.168.0.117:8092",
     //地区
     options: [
         {
@@ -14817,7 +14817,12 @@ const configs = {
     parkType: [{ value: "01", label: "商业综合体" }, { value: "02", label: "房地产小区" },
     { value: "03", label: "办公写字楼" }, { value: "04", label: "医院" },
     { value: "05", label: "旅游度假区" }, { value: "06", label: "休闲娱乐" }
-    ]
+    ],
+    filetype: [{ value: "1", label: "合作商点击对账文件" },
+    { value: "2", label: ":广告主点击对账文件" },
+    { value: "3", label: "合作商曝光对账文件" },
+    { value: "4", label: "广告主曝光对账文件" }],
+    adEleType:[{value:"01",label:"海报"},{value:"02",label:"视频"},{value:"03",label:"视频加海报"}]
 
     // 广告管理系统
 }

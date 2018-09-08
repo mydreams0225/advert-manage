@@ -27,7 +27,7 @@ export const reqGGWList = params => {
 };
 //reqQRcode 
 export const reqQRcode = params => {
-    return $axios.post(`${base}/partner/ad/list`,
+    return $axios.post(`${base}/partner/ad/adContent`,
         qs.stringify(params, { indices: false }),
         {  // 这里是跨域写法  
             headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", }  // 这里是跨域的写法  

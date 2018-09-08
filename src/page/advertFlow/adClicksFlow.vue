@@ -32,11 +32,13 @@
                     <el-table-column
                     prop="expFlowId"
                     label="曝光流水编号"
+                    width="200px"
                     align="center">
                     </el-table-column>
                     <el-table-column
                     prop="adrId"
                     label="广告主编号"
+                    width="200px"
                     align="center">
                     </el-table-column>
                     <el-table-column
@@ -52,27 +54,42 @@
                     <el-table-column
                     prop="adId"
                     label="广告位编号"
+                    width="120px"
                     align="center">
                     </el-table-column>
                     <el-table-column
                     prop="adName"
                     label="广告位名称"
+                    width="120px"
                     align="center">
                     </el-table-column>
                      <el-table-column
                     prop="putPlanId"
                     label="投放计划编号"
-                    align="center">
+                    width="150px"
+                    align="center"
+                    v-if="tb.advert_show_applyplan_number_table">
                     </el-table-column>
                      <el-table-column
                     prop="adPlanName"
                     label="广告计划名称"
-                    align="center">
+                    width="150px"
+                    align="center"
+                    v-if="tb.advert_show_applyplan_name_table">
                     </el-table-column>
                      <el-table-column
                     prop="adEleName"
                     label="广告元素名称"
-                    align="center">
+                    width="150px"
+                    align="center"
+                    v-if="tb.advert_show_element_name_table">
+                    </el-table-column>
+                    <el-table-column
+                    prop="adEleId"
+                    label="广告元素编号"
+                    width="150px"
+                    align="center"
+                    v-if="tb.advert_show_element_number_table">
                     </el-table-column>
                     <el-table-column
                     prop="feeMethod"
@@ -87,16 +104,20 @@
                     <el-table-column
                     prop="expUnitPrice"
                     label="曝光单价"
-                    align="center">
+                    align="center"
+                    v-if="tb.advert_show_advert_price_table">
                     </el-table-column>
                     <el-table-column
                     prop="coopBA"
                     label="合作商获益金额"
-                    align="center">
+                    width="150px"
+                    align="center"
+                    v-if="tb.advert_show_partner_price_table">
                     </el-table-column>
                     <el-table-column
                     prop="expDate"
                     label="曝光时间"
+                    width="200px"
                     align="center">
                     </el-table-column>
                  </el-table>
@@ -110,10 +131,18 @@
 <script>
 import query from "@/components/queryArea/queryExp";
 import paging from "@/components/common/paging.vue";
-import {reqAdClickFlow} from '@/api/advertFlow/adClicksFlow';
+import { reqAdClickFlow } from "@/api/advertFlow/adClicksFlow";
 export default {
   data() {
     return {
+      tb:{
+        advert_show_applyplan_number_table:this.common.has("advert_show_applyplan_number_table"),
+        advert_show_applyplan_name_table:this.common.has("advert_show_applyplan_name_table"),
+        advert_show_element_name_table:this.common.has("advert_show_element_name_table"),
+        advert_show_element_number_table:this.common.has("advert_show_element_number_table"),
+        advert_show_advert_price_table:this.common.has("advert_show_advert_price_table"),
+        advert_show_partner_price_table:this.common.has("advert_show_partner_price_table")
+      },
       expDate: "",
       //   expDate: new Date().getTime() + 3600 * 1000 * 24 * 3,
       area: {
@@ -121,7 +150,14 @@ export default {
         coopId: "合作商编号",
         clickFlowId: "点击流水号",
         ggwId: "广告位编号",
-        planId: "投放计划编号"
+        planId: "投放计划编号",
+        adEleId: "广告元素编号",
+        ifadId: this.common.has("advert_click_advertisernum_search"),
+        ifcoopId: this.common.has("advert_click_partnernum_search"),
+        ifclickFlowId: this.common.has("advert_click_number_search"),
+        ifggwId: this.common.has("dvert_click_advertposition_search"),
+        ifplanId: this.common.has("advert_click_applyplan_search"),
+        ifadEleId: this.common.has("advert_click_element_search")
       },
       tableLoading: false,
       adClickData: [{}],
@@ -144,35 +180,75 @@ export default {
   },
   methods: {
     querys(list) {
-      var _this=this;
+      this.adClickData=[];
+      var list =list || {}
+      var _this = this;
       this.tableLoading = true;
       let para = {
-        adId: this.filters.adids,
-        coopId: this.filters.coopId,
-        clickFlowId: this.filters.clickFlowId,
-        ggwId: this.filters.ggwId,
-        planId: this.filters.planId,
-        expDate: this.expDate,
-        currentPage:this.totals.currentPage,
-        pageSize:this.totals.pageSize,
-        token: window.localStorage.getItem("token")
+        advertisernum: list.adIds, // 广告主编号
+        partnernum: list.coopIds, //合作商 编号
+        advertshownum: list.clickFlowIds, // 曝光流水号
+        advertpositionnum: list.ggwIds, // 广告位编号
+        spreadplannum: list.planIds, // 投放计划编号
+        advertelenum: list.adEleIds,
+        showdate: this.expDate, // 曝光日期
+        currentPage: this.totals.currentPage,
+        pageSize: this.totals.pageSize,
+        token: window.localStorage.getItem("token"),
+        userId: window.localStorage.getItem("username"),
+        identity: window.localStorage.getItem("identitys")
       };
       reqAdClickFlow(para)
         .then(res => {
           if (res.status === 200) {
-             var list = res.list;
-            _this.loopItem(list);
+            var list = res.data.list;
+            list && list.length != 0 ? _this.loopItem(list) : "";
             _this.totals.totalNum = res.data.totalNum;
           } else if (res.status === 202) {
-             _this.common.tokenCheck(_this);
+            _this.common.tokenCheck(_this);
           }
           _this.tableLoading = false;
         })
-        .catch(()=>{
+        .catch(() => {
           this.$message.error("请求超时，请重新发送请求");
           _this.tableLoading = false;
           return false;
         });
+    },
+    loopItem(list) {
+      var _this =this;
+      list.forEach(item => {
+        //  let feeMethod = this.filterItem(
+        //   item.ratemode,
+        //   _this.configs.feeMethod
+        // );
+        let temp = {
+          expFlowId: item.advertclicknum, // 曝光流水编号
+          adrId: item.advertisernum, //广告主编号
+          adrName: item.advertisername, // 广告主
+          coop: item.partnername, // 合作商
+          adId: item.advertpositionnum, // 广告位编号
+          adName: item.advertpositionname, // 广告位名称
+          putPlanId: item.putPlanId, // 投放计划编号
+          adPlanName: item.planname, // 广告计划名称
+          adEleName: item.advertelename, // 广告元素名称
+          feeMethod: item.ratemode, //计费方式
+          terminalIP: item.showip, //终端IP
+          expUnitPrice: item.showprice, // 曝光单价
+          coopBA: item.partnergetprice, // 合作商获益金额
+          expDate: item.showtime // 曝光时间
+        };
+        this.adClickData.push(temp);
+      });
+    }, 
+    filterItem(str, list) {
+      var temp = "";
+      for (var i = 0; i < list.length; i++) {
+        if (str === list[i].value) {
+          return (temp = list[i].label);
+        }
+      }
+      return temp;
     },
     CurrentChanges(currentPage, pageSize) {
       this.totals.currentPage = currentPage;

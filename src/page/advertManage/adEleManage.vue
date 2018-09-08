@@ -1,7 +1,7 @@
 <template>
     <section>
         <div class="parent">
-            <div class="margin-tops">
+            <div class="margin-tops query">
                 <el-button 
                     type="success" 
                     size="medium" 
@@ -36,7 +36,7 @@
                     align="center">
                     </el-table-column>
                     <el-table-column
-                    prop="adType"
+                    prop="adTypeName"
                     label="广告类型"
                     align="center">
                     </el-table-column>
@@ -57,7 +57,7 @@
                                      type="primary" size="mini" 
                                      class="el-icon-edit"></el-button>
                                 <el-button
-                                    @click.native.prevent="deleteRow(scope.$index, scope.row.advertId)"
+                                    @click.native.prevent="deleteRow(scope.$index, scope.row.eleId)"
                                     type="danger"
                                     class="el-icon-error"
                                     size="mini">
@@ -82,8 +82,8 @@
                                 :model="dialog.list"  
                                 :rules="rules" 
                                 ref="dialog.list">
-                            <el-form-item  label="页面名称：" prop="pageName">
-                                <el-input v-model="dialog.list.pageName"></el-input>
+                            <el-form-item  label="页面名称：" prop="adEleName">
+                                <el-input v-model="dialog.list.adEleName"></el-input>
                             </el-form-item>
                             <el-form-item  label="广告类型：" prop="adType">
                                 <el-select v-model="dialog.list.adType" >
@@ -177,13 +177,17 @@
 <script>
 import query from "@/components/queryArea/queryAd";
 import paging from "@/components/common/paging";
-import { reqAdEleList,reqEditadEle,reqAddadEle,reqRemoveELe } 
-from "@/api/advertManage/adEle";
+import {
+  reqAdEleList,
+  reqEditadEle,
+  reqAddadEle,
+  reqRemoveELe
+} from "@/api/advertManage/adEle";
 export default {
   data() {
     return {
       rules: {
-        pageName: [
+        adEleName: [
           { required: true, message: "请输入页面名称", trigger: "blur" }
         ],
         adType: [
@@ -194,10 +198,11 @@ export default {
         adType: [{ label: "1", value: "1" }]
       },
       area: {
-        name: "搜索"
+        name: "搜索广告元素类型",
+        options:configs.adEleType
       },
       tableLoading: false,
-      list: [{}],
+      list: [{eleId:"1",adEleName:"fff",adTypeName:"1",createDate:"20182323",adType:"2"}],
       totals: {
         totalNum: 0,
         currentPage: 1,
@@ -216,24 +221,27 @@ export default {
       }
     };
   },
-  mounted(){
+  mounted() {
     this.querys();
   },
   methods: {
     querys(name) {
+     
       var _this = this;
       let para = {
         adverteletype: name,
         currentPage: this.totals.currentPage,
         pageSize: this.totals.pageSize,
         token: window.localStorage.getItem("token"),
-        userId:window.localStorage.getItem("username")
+        userId: window.localStorage.getItem("username")
       };
       reqAdEleList(para)
         .then(res => {
+           this.list=[];
           if (res.status === "200") {
-            var list = res.list;
-            _this.loopItem(list);
+            var list = res.list.data;
+            list && list.length != 0 ? _this.loopItem(list) : "";
+            _this.totals.totalNum = res.data.totalNum;
           } else if (res.status === "202") {
             _this.common.tokenCheck(_this);
           }
@@ -247,29 +255,45 @@ export default {
     },
     loopItem(list) {
       list.forEach(item => {
+         let adTypeName =  this.filterItem(item.adverteletype,list);
         var temp = {
-          eleId: item.eleId,
-          adEleName: item.adEleName,
-          adType: item.adType,
-          createDate: item.createDate
+          eleId: item.advertelenum,
+          adEleName: item.advertelenam,
+          adType: item.adverteletype,
+          //  adTypeName:adTypeName,
+          eleType:item.adverteletype,
+          poster:item.advertelecoverimgpath, //视频封面
+          url:item.advertelevideopath,
+          image:item.adverteleimgpath,
+          createDate: item.createdate,
+          urls: item.elejumpurl
         };
         this.list.push(temp);
       });
     },
+    filterItem(str, list) {
+      var temp = "";
+      for (var i = 0; i < list.length; i++) {
+        if (str === list[i].value) {
+          return (temp = list[i].label);
+        }
+      }
+      return temp;
+    },
+    //编辑
     handleClick(row) {
-     
       this.dialog.dialogVisible = true;
       this.dialog.title = "修改广告元素";
       this.dialog.list = row;
     },
-    deleteRow(index,id) {
-         let  _this = this;
-        this.$confirm("确认删除该记录吗?", "提示", {
+    deleteRow(index, id) {
+      let _this = this;
+      this.$confirm("确认删除该记录吗?", "提示", {
         type: "warning"
       })
         .then(() => {
           let para = {
-            shopno: id, 
+            eleId: id,
             token: window.localStorage.getItem("token")
           };
           reqRemoveELe(para).then(res => {
@@ -285,64 +309,65 @@ export default {
           });
         })
         .catch(() => {
-             _this.$message.error("请求超时，请重新发送请求");
-              _this.dialog.loading = false;
-              return false;
+          _this.$message.error("请求超时，请重新发送请求");
+          _this.dialog.loading = false;
+          return false;
         });
     },
-    submit(formName){
-         this.dialog.loading = true;
+    submit(formName) {
+      this.dialog.loading = true;
       var _this = this;
       this.$refs[formName].validate(valid => {
-        if(valid){
-          let para= {
-             
-          }
-           this.reqData(this.list.title ,para);
-        }else{
-           _this.$message.error("请完善必填项信息");
-           _this.dialog.loading = false;
+        if (valid) {
+          let para = {};
+          this.reqData(this.list.title, para);
+        } else {
+          _this.$message.error("请完善必填项信息");
+          _this.dialog.loading = false;
           return false;
         }
       });
     },
-    reqData(title,para){
-       if (title === "添加广告元素") {
-            // 添加请求
-            reqAddadEle(para).then(res => {
-              if (res.status === 200) {
-                this.$message({
-                  message: "添加成功",
-                  type: "success"
-                });
-              } else if (res.status === 202) {
-                _this.common.tokenCheck(_this);
-              }
-               _this.dialog.loading = false;
-            }).catch(err => {
-              _this.dialog.loading = false;
-              _this.$message.error("请求超时，请重新发送请求");
-              return false;
-            });;
-          } else {
-            // 修改请求
-            reqEditadEle(para).then(res => {
-              if (res.status === 200) {
-                this.$message({
-                  message: "修改成功",
-                  type: "success"
-                });
-              } else if (res.status === 202) {
-                _this.common.tokenCheck(_this);
-                
-              }
-              _this.dialog.loading = false;
-            }).catch(err => {
-              _this.$message.error("请求超时，请重新发送请求");
-              _this.dialog.loading = false;
-              return false;
-            });;
-          }
+    reqData(title, para) {
+      if (title === "添加广告元素") {
+        // 添加请求
+        reqAddadEle(para)
+          .then(res => {
+            if (res.status === 200) {
+              this.$message({
+                message: "添加成功",
+                type: "success"
+              });
+            } else if (res.status === 202) {
+              _this.common.tokenCheck(_this);
+            }
+            _this.dialog.loading = false;
+          })
+          .catch(err => {
+            _this.dialog.loading = false;
+            _this.$message.error("请求超时，请重新发送请求");
+            return false;
+          });
+      } else {
+        // 修改请求
+        reqEditadEle(para)
+          .then(res => {
+            if (res.status === 200) {
+              this.$message({
+                message: "修改成功",
+                type: "success"
+              });
+            } else if (res.status === 202) {
+              _this.common.tokenCheck(_this);
+            }
+            _this.dialog.loading = false;
+          })
+          .catch(err => {
+            _this.$message.error("请求超时，请重新发送请求");
+            _this.dialog.loading = false;
+            return false;
+          });
+      }
     },
     currentChange(currentPage, pageSize) {
       this.totals.currentPage = currentPage;
@@ -376,6 +401,9 @@ export default {
 .el-select,
 .el-cascader {
   width: 300px;
+}
+.query .el-select{
+  width: 200px
 }
 .dialog .btn {
   padding-left: 160px;

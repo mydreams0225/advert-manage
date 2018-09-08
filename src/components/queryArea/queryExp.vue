@@ -1,10 +1,11 @@
 <template>
     <div class="queryArea">
-        <el-input :placeholder="area.adId" v-model="list.adIds" ></el-input>
-        <el-input :placeholder="area.coopId" v-model="list.coopIds"></el-input>
-        <el-input :placeholder="area.clickFlowId" v-model="list.clickFlowIds"></el-input>
-        <el-input :placeholder="area.ggwId" v-model="list.ggwIds"></el-input>
-        <el-input :placeholder="area.planId" v-model="list.planIds"></el-input>
+        <el-input :placeholder="area.adId" v-model="list.adIds" v-if="area.ifadId"></el-input>
+        <el-input :placeholder="area.coopId" v-model="list.coopIds" v-if="area.ifcoopId"></el-input>
+        <el-input :placeholder="area.clickFlowId" v-model="list.clickFlowIds" v-if="area.ifclickFlowId"></el-input>
+        <el-input :placeholder="area.ggwId" v-model="list.ggwIds" v-if="area.ifggwId"></el-input>
+        <el-input :placeholder="area.planId" v-model="list.planIds" v-if="area.ifplanId"></el-input>
+        <el-input :placeholder="area.adEleId" v-model="list.adEleId" v-if="area.ifadEleId"></el-input>
         <el-button size="medium" type="primary" @click="query">查询</el-button>
     </div>
 </template>
@@ -16,7 +17,8 @@ export default {
       coopId: "",
       clickFlowId: "",
       ggwId: "",
-      planId: ""
+      planId: "",
+      adEleId:""
     }
   },
   data() {
@@ -26,7 +28,8 @@ export default {
         coopIds: "",
         clickFlowIds: "",
         ggwIds: "",
-        planIds: ""
+        planIds: "",
+        adEleId:""
       }
     };
   },
