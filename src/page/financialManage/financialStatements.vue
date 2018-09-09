@@ -3,7 +3,7 @@
         <div class="parent">
             <div class="margin-tops">
                <el-row>
-                    <el-col :span="6" v-for="(o, index) in list" :key="index" :offset="index > 0 ? 2 : 0">
+                    <el-col class="cols" :span="6" v-for="(o, index) in list" :key="index"  >
                         <el-card :body-style="{ padding: '0px' }" class="card">
                         <!-- <img src="~examples/assets/images/hamburger.png" class="image"> -->
                              <el-row >
@@ -32,7 +32,7 @@
                              </el-row>
                         </el-card>
                     </el-col>
-                 </el-row>
+               </el-row>
             </div>
             <div class="margin-tops">
                 <div class="showTitle">
@@ -88,21 +88,43 @@ export default {
     this.myChartData(data);
   },
   mounted() {
-    this.initChart();
+    
     this.query();
     this.queryTop();
+    // this.initChart();
   },
   methods: {
     queryTop() {
+      debugger
+      var _this = this;
       let para = {
         //用户id
-        token: window.localStorage.getItem("token")
+        token: window.localStorage.getItem("token"),
+        userId: window.localStorage.getItem("username"),
+        identity: window.localStorage.getItem("identitys")
       };
+      // 顶部数据
       reqfsTable(para)
         .then(res => {
           if (res.status === 200) {
-            let lists = res.list;
-            lists.length !== 0 ? this.loopfsTable(lists) : "";
+            let lists = res.data;
+            if (lists) {
+              _this.list.push(
+                {
+                  mount: lists.expenditure,
+                  name: "当天花费或收益"
+                },
+                { mount: lists.showCount, name: "曝光数" },
+ 
+                { mount: lists.clickCount, name: "点击数" },
+                {
+                  mount: lists.advertPlanPositionCount,
+                  name: "广告位数/计划数"
+                },
+                { mount: lists.balance, name: "余额" }
+              );
+
+            }
           } else if (res.status === 202) {
             _this.common.tokenCheck(_this);
           }
@@ -115,38 +137,63 @@ export default {
     },
     loopfsTable(list) {
       list.forEach(item => {
-          var temp = {
-               
-          };
-           this.list.push(temp);
+        var temp = {};
+        this.list.push(temp);
       });
     },
     query() {
+      this.mychart={}
+      var _this = this;
       let para = {
-        data: this.data,
-        token: window.localStorage.getItem("token")
+        day: this.data,
+        token: window.localStorage.getItem("token"),
+        userId: window.localStorage.getItem("username"),
+        identity: window.localStorage.getItem("identitys")
       };
-
+      debugger
+      // 报表请求
       reqfinaState(para)
         .then(res => {
           this.areacolumn = [];
           if (res.status === 200) {
-            var list = res.list;
-            list.length !== 0 ? this.loopItem(list) : "";
+            var list = res.data;
+            _this.mychart.axxisData = list.xAxis[0].data;
+            _this.mychart.legendData = list.legendData;
+            var series = res.data.series;
+            series.length != 0 && series ? _this.loopseries(series) : "";
+
+            // list.length !== 0 ? this.loopItem(list) : "";
             // this.loopItem(list);
           } else if (res.status === 202) {
             _this.common.tokenCheck(_this);
           }
+           this.initChart();
+          console.log(_this.mychart.legendData)
         })
-        .catch(() => {
+        .catch(err => {
           this.$message.error("请求超时，请重新发送请求");
           this.tableLoading = false;
           return false;
         });
     },
+    loopseries(lists) {
+      lists.forEach(items => {
+        if (items.name === "点击") {
+          this.mychart.clickData = items.data;
+        }
+        if ((items.name === "曝光")) {
+          this.mychart.expData = items.data;
+        }
+        if (items.name === "包日") {
+          this.mychart.dayData = items.data;
+        }
+      });
+    },
     loopItem(list) {
       list.forEach(item => {
-        var temp = {};
+        var temp = {
+          axxisData: item.xAxis
+        };
         this.areacolumn.push(temp);
       });
     },
@@ -184,7 +231,6 @@ export default {
       myChart.setOption({
         title: { text: "" },
         color: this.colors,
-
         tooltip: {
           trigger: "axis",
           axisPointer: {
@@ -310,6 +356,10 @@ export default {
 }
 .showDate span {
   font-size: 14px;
+}
+.cols{
+  margin: 5px;
+  min-width: 50px;
 }
 </style>
 

@@ -12,23 +12,23 @@ export const reqAdEleList = params => {
 //reqEditadEle
 export const reqEditadEle = params => {
     return $axios.post(`${base}/advert/ad/update`,
-    qs.stringify(params, { indices: false }),
+    qs.parse(params, { indices: false }),
     {  // 这里是跨域写法  
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", }  // 这里是跨域的写法  
+        headers: { "Content-Type": "application/json", }  // 这里是跨域的写法  
     }).then(res => res.data);
 };
 
 //reqEditadEle
 export const reqAddadEle = params => {
     return $axios.post(`${base}/advert/ad/save`,
-    qs.stringify(params, { indices: false }),
+    qs.parse(params, { indices: false }),
     {  // 这里是跨域写法  
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", }  // 这里是跨域的写法  
+        headers: { "Content-Type": "application/json", }  // 这里是跨域的写法  
     }).then(res => res.data);
 };
 //reqRemoveELe
 export const reqRemoveELe = params => {
-    return $axios.post(`${base}/team/shop/get`,
+    return $axios.post(`${base}/advert/ad/remove`,
     qs.stringify(params, { indices: false }),
     {  // 这里是跨域写法  
         headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", }  // 这里是跨域的写法  

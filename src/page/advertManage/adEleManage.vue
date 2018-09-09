@@ -95,47 +95,49 @@
                                     </el-option>
                                     </el-select>
                             </el-form-item>
-                            <el-form-item  label="元素类型：" prop="eleType">
-                                <el-radio v-model="dialog.list.eleType" label="1">海报</el-radio>
-                                <el-radio v-model="dialog.list.eleType" label="2">视频</el-radio>
-                                <el-radio v-model="dialog.list.eleType" label="3">视频和海报</el-radio>
+                            <el-form-item  label="元素类型：">
+                              <el-radio-group v-model="dialog.list.eleType">
+                                <el-radio label="01">海报</el-radio>
+                                <el-radio  label="02">视频</el-radio>
+                                <el-radio  label="03">视频和海报</el-radio>
+                              </el-radio-group>
                             </el-form-item>
-                            <el-form-item  v-if="dialog.list.eleType==='1' ||dialog.list.eleType==='3' " label="海报图片：" prop="postImg">
+                            <el-form-item  v-if="dialog.list.eleType==='01' ||dialog.list.eleType==='03' " label="海报图片：" prop="postImg">
                                 <el-upload
                                         class="upload-demo"
                                         ref="upload"
                                         action="https://jsonplaceholder.typicode.com/posts/"
                                         :on-remove="handleRemove"
                                         :file-list="dialog.list.postImg"
-                                        :auto-upload="false">
-                                        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                                        :auto-upload="true"
+                                        :before-upload="buImage">
+                                        <el-button slot="trigger" size="small" type="primary"  >选取文件</el-button>
                                         <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                                         </el-upload>
                             </el-form-item>
-                            <el-form-item  v-if="dialog.list.eleType==='2' ||dialog.list.eleType==='3' " label="视频封面" prop="videoPost">
+                            <el-form-item  v-if="dialog.list.eleType==='02' ||dialog.list.eleType==='03' " label="视频封面" prop="videoPost">
                                 <el-upload
                                         class="upload-demo"
                                         ref="upload"
                                         action="https://jsonplaceholder.typicode.com/posts/"
                                         :on-remove="handleRemove"
                                         :file-list="dialog.list.videoPost"
-                                        :auto-upload="false">
+                                        :auto-upload="true"
+                                        :before-upload="buFengMian">
                                         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
                                         <div slot="tip" class="el-upload__tip">与视频文件像素相同,大小不超过200KB</div>
                                         </el-upload>
                             </el-form-item>
-                            <el-form-item  v-if="dialog.list.eleType==='2' ||dialog.list.eleType==='3' " label="视频文件" prop="videoFile">
+                            <el-form-item  v-if="dialog.list.eleType==='02' ||dialog.list.eleType==='03' " label="视频文件" prop="videoFile">
                                 <el-upload
                                         class="upload-demo"
                                         ref="upload"
                                         action="https://jsonplaceholder.typicode.com/posts/"
                                         :on-remove="handleRemove"
                                         :file-list="dialog.list.videoFile"
-                                        :auto-upload="false">
+                                        :auto-upload="true"
+                                        :before-upload="buVideo">
                                         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
                                         <div slot="tip" class="el-upload__tip">仅支持mp4，大小为5MB</div>
                                         </el-upload>
                             </el-form-item>
@@ -195,23 +197,33 @@ export default {
         ]
       },
       config: {
-        adType: [{ label: "1", value: "1" }]
+        adType: configs.ggwType
       },
       area: {
         name: "搜索广告元素类型",
-        options:configs.adEleType
+        options: configs.adEleType
       },
       tableLoading: false,
-      list: [{eleId:"1",adEleName:"fff",adTypeName:"1",createDate:"20182323",adType:"2"}],
+      list: [
+        {
+          eleId: "1",
+          adEleName: "fff",
+          adTypeName: "1",
+          createDate: "20182323",
+          adType: "2"
+        }
+      ],
       totals: {
         totalNum: 0,
         currentPage: 1,
         pageSize: 10
       },
       dialog: {
+        loading:false,
         title: "",
         dialogVisible: false,
         list: {
+          eleType:"01",
           image: "../../../static/img/car.jpg",
           pageName: "",
           poster: "../../../static/img/car.jpg",
@@ -226,7 +238,6 @@ export default {
   },
   methods: {
     querys(name) {
-     
       var _this = this;
       let para = {
         adverteletype: name,
@@ -237,17 +248,18 @@ export default {
       };
       reqAdEleList(para)
         .then(res => {
-           this.list=[];
-          if (res.status === "200") {
-            var list = res.list.data;
+          debugger
+          this.list = [];
+          if (res.status === 200) {
+            var list = res.data.list;
             list && list.length != 0 ? _this.loopItem(list) : "";
             _this.totals.totalNum = res.data.totalNum;
-          } else if (res.status === "202") {
+          } else if (res.status === 202) {
             _this.common.tokenCheck(_this);
           }
           this.tableLoading = false;
         })
-        .catch(() => {
+        .catch(err => {
           _this.$message.error("请求超时，请重新发送请求");
           this.tableLoading = false;
           return false;
@@ -255,16 +267,17 @@ export default {
     },
     loopItem(list) {
       list.forEach(item => {
-         let adTypeName =  this.filterItem(item.adverteletype,list);
+        let adTypeName = this.filterItem(item.adverttype, this.config.adType);
         var temp = {
           eleId: item.advertelenum,
           adEleName: item.advertelenam,
-          adType: item.adverteletype,
+          adType: item.adverttype,
+          adTypeName:adTypeName,
           //  adTypeName:adTypeName,
-          eleType:item.adverteletype,
-          poster:item.advertelecoverimgpath, //视频封面
-          url:item.advertelevideopath,
-          image:item.adverteleimgpath,
+          eleType: item.adverteletype ,
+          poster: item.advertelecoverimgpath, //视频封面
+          url: item.advertelevideopath,
+          image: item.adverteleimgpath,
           createDate: item.createdate,
           urls: item.elejumpurl
         };
@@ -282,9 +295,18 @@ export default {
     },
     //编辑
     handleClick(row) {
+      debugger
       this.dialog.dialogVisible = true;
       this.dialog.title = "修改广告元素";
-      this.dialog.list = row;
+      // this.dialog.list = row;
+      this.dialog.list.adEleName = row.adEleName;
+      this.dialog.list.eleId=row.eleId;
+      this.dialog.list.adType=row.adType;
+      this.dialog.list.eleType=row.eleType;
+      this.dialog.list.postImg = row.postImg;
+      this.dialog.list.videoPost=row.videoPost;
+      this.dialog.list.videoFile=row.videoFile;
+      this.dialog.list.urls=row.urls;
     },
     deleteRow(index, id) {
       let _this = this;
@@ -293,7 +315,7 @@ export default {
       })
         .then(() => {
           let para = {
-            eleId: id,
+            advertelenum: id,
             token: window.localStorage.getItem("token")
           };
           reqRemoveELe(para).then(res => {
@@ -302,25 +324,42 @@ export default {
                 message: "删除成功",
                 type: "success"
               });
+              _this.querys();
             } else if (res.status === 202) {
               _this.common.tokenCheck(_this);
             }
-            this.querys();
+           
           });
         })
-        .catch(() => {
+        .catch(err => {
           _this.$message.error("请求超时，请重新发送请求");
           _this.dialog.loading = false;
           return false;
         });
     },
     submit(formName) {
+      this.dialog.loading=true;
+      var _this = this;
       this.dialog.loading = true;
       var _this = this;
       this.$refs[formName].validate(valid => {
         if (valid) {
-          let para = {};
-          this.reqData(this.list.title, para);
+          let para = {
+              token:window.localStorage.getItem("token"),
+              userId:window.localStorage.getItem("username"),
+              params:{
+                advertelenum:_this.dialog.list.eleId,
+                advertelenam:_this.dialog.list.adEleName,
+                adverteletype:_this.dialog.list.adType,
+                adverteleimgpath:_this.dialog.list.postImg,
+                advertelevideopath:_this.dialog.list.videoFile,
+                advertelecoverimgpath:_this.dialog.list.videoPost,
+                elejumpurl:_this.dialog.list.urls,
+                adverteletype:_this.dialog.list.adType
+              }
+          };
+          debugger
+          this.reqData(this.dialog.title, para);
         } else {
           _this.$message.error("请完善必填项信息");
           _this.dialog.loading = false;
@@ -329,7 +368,9 @@ export default {
       });
     },
     reqData(title, para) {
+      var _this = this;
       if (title === "添加广告元素") {
+        debugger
         // 添加请求
         reqAddadEle(para)
           .then(res => {
@@ -338,9 +379,12 @@ export default {
                 message: "添加成功",
                 type: "success"
               });
+              _this.querys();
             } else if (res.status === 202) {
               _this.common.tokenCheck(_this);
             }
+            _this.dialog.dialogVisible=false;
+            
             _this.dialog.loading = false;
           })
           .catch(err => {
@@ -352,14 +396,17 @@ export default {
         // 修改请求
         reqEditadEle(para)
           .then(res => {
+            debugger
             if (res.status === 200) {
               this.$message({
                 message: "修改成功",
                 type: "success"
               });
+              _this.querys();
             } else if (res.status === 202) {
               _this.common.tokenCheck(_this);
             }
+             _this.dialog.dialogVisible=false;
             _this.dialog.loading = false;
           })
           .catch(err => {
@@ -388,6 +435,118 @@ export default {
       this.dialog.dialogVisible = true;
       this.dialog.title = "添加广告元素";
       this.dialog.list = {};
+      this.dialog.list.eleType='01';
+    },
+    buImage(file) {
+      var  _this = this;
+      debugger
+      const isLt10M = file.size / 1024 / 1024 < 0.5;
+      if (
+        [
+         "image/jpg",
+         "image/jpeg",
+         "image/png",
+         "image/pjpeg",
+         "image/gif",
+         "image/bmp",
+         "image/x-png"
+        ].indexOf(file.type) == -1
+      ) {
+        this.$message.error("请上传正确图片格式");
+        return false;
+      }
+       if (!isLt10M) {
+        this.$message.error("上传图片大小不能超过500KB哦!");
+        return false;
+      }
+          let formData = new FormData();
+          formData.append("file", file);
+        axios
+          .post("http://192.168.0.116:8083/pic/upload", formData)
+          .then(function(response) {
+            _this.dialog.list.image = response.data;
+            // alert(response.data);
+            console.log(response);
+          })
+          .catch(function(error) {
+            alert("上传失败");
+            console.log(error);
+          });
+      
+    },
+    buVideo(file){
+          var  _this = this;
+      debugger
+      const isLt10M = file.size / 1024 / 1024 < 5;
+      if (
+        [
+          "video/mp4",
+          "video/ogg",
+          "video/flv",
+          "video/avi",
+          "video/wmv",
+          "video/rmvb"
+        ].indexOf(file.type) == -1
+      ) {
+        this.$message.error("请上传正确的视频格式");
+        return false;
+      }
+      else if (!isLt10M) {
+        this.$message.error("上传视频大小不能超过5MB哦!");
+        return false;
+      }else{
+          let formData = new FormData();
+          formData.append("file", file);
+        axios
+          .post("http://192.168.0.116:8083/pic/upload", formData)
+          .then(function(response) {
+            _this.dialog.list.image = response.data;
+            // alert(response.data);
+            console.log(response);
+          })
+          .catch(function(error) {
+            alert("上传失败");
+            console.log(error);
+          });
+      }
+
+    },
+    buFengMian(file){
+      var  _this = this;
+      debugger
+      const isLt10M = file.size / 1024 / 1024 < 0.2;
+      if (
+        [
+         "image/jpg",
+         "image/jpeg",
+         "image/png",
+         "image/pjpeg",
+         "image/gif",
+         "image/bmp",
+         "image/x-png"
+        ].indexOf(file.type) == -1
+      ) {
+        this.$message.error("请上传正确图片格式");
+        return false;
+      }
+       if (!isLt10M) {
+        this.$message.error("上传图片大小不能超过200KB哦!");
+        return false;
+      }
+          let formData = new FormData();
+          formData.append("file", file);
+        axios
+          .post("http://192.168.0.116:8083/pic/upload", formData)
+          .then(function(response) {
+            _this.dialog.list.image = response.data;
+            // alert(response.data);
+            console.log(response);
+          })
+          .catch(function(error) {
+            alert("上传失败");
+            console.log(error);
+          });
+      
     }
   },
   components: {
@@ -402,8 +561,8 @@ export default {
 .el-cascader {
   width: 300px;
 }
-.query .el-select{
-  width: 200px
+.query .el-select {
+  width: 200px;
 }
 .dialog .btn {
   padding-left: 160px;

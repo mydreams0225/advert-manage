@@ -14800,7 +14800,11 @@ const configs = {
     ],
 
     // 广告管理系统
-    ggwType: [{ value: "01", label: "开屏广告" }],
+    ggwType: [{ value: "01", label: "开屏广告" },
+    {value:"02",label:"焦点图广告"},
+    {value:"03",label:"banner位"},
+    {value:"04",label:"支付后全屏广告"},
+    {value:"05",label:"支付后嵌入"}],
     ggwCategory: [
         { value: "01", label: "停车场" },
         { value: "02", label: "APP应用" }
