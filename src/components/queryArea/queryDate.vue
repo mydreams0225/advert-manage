@@ -4,13 +4,15 @@
             <el-date-picker
                 v-model="launchDateF"
                 type="date"
-                placeholder="选择日期">
+                placeholder="选择日期"
+                value-format="yyyyMMdd">
             </el-date-picker>
         <label for="">至</label>
             <el-date-picker
                 v-model="launchDateT"
                 type="date"
-                placeholder="选择日期">
+                placeholder="选择日期"
+                value-format="yyyyMMdd">
             </el-date-picker>
         <el-button size="medium" type="primary" @click="query">查询</el-button>
     </div>

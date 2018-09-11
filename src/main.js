@@ -75,6 +75,7 @@ router.beforeEach((to, from, next) => {
           console.log(data);
           window.localStorage.setItem("identitys",data.data.identity);
           window.localStorage.setItem("username",data.data.username);
+          window.localStorage.setItem("userId",data.data.userId);
           token=window.localStorage.getItem("token");
           //  _this.sysUserName = data.data.username || "测试";
           // this.sysUserAvatar = user.avatar || "";

@@ -20,7 +20,7 @@ const configs = {
     // sy   base: "http://192.168.0.105:8081/park",
     //pf
     login: "http://192.168.0.112:8088",
-    base: "http://192.168.0.117:8092",
+    base: "http://192.168.0.112:8091",
     //地区
     options: [
         {

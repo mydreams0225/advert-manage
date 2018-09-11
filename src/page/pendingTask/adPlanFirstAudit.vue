@@ -50,8 +50,8 @@
                             align="center"
                              width="250px">
                             <template slot-scope="scope">
-
-                            </template>
+                               <el-input v-if="scope.row.approvalStatus==='0'"   type="success" size="mini">审核</el-input>
+                        </template>
                      </el-table-column>
                 </el-table>
             </div>
@@ -63,53 +63,57 @@
     </section>
 </template>
 <script>
-import query from '@/components/queryArea/queryTask'
-import paging from '@/components/common/paging'
+import query from "@/components/queryArea/queryTask";
+import paging from "@/components/common/paging";
+import { reqQuery } from "@/api/padingTask/adPlanAudit";
 export default {
-    data(){
-        return{
-           areas:{
-                ad1:"创建日期",
-                ad2:"计划名称",
-                ad3:"广告主编号"
-            },
-            totals:{
-                totalNum:0,
-                currentPage:1,
-                pageSize:10
-            },
-            tableLoading:false,
-            List:[]
-        }
+  data() {
+    return {
+      areas: {
+        ad1: "创建日期",
+        ad2: "计划名称",
+        ad3: "广告主编号"
+      },
+      totals: {
+        totalNum: 0,
+        currentPage: 1,
+        pageSize: 10
+      },
+      tableLoading: false,
+      List: []
+    };
+  },
+  methods: {
+    query(list) {
+      let para = {
+        token: window.localStorage.getItem("token"),
+        createDate: list.ads1,
+        planName: list.ads2,
+        advertiserNum: list.ads3,
+        currentPage: this.totals.currentPage,
+        pageSize: this.totals.pageSize
+      };
+      reqQuery(para)
+        .then(res => {
+          if (res.status === 200) {
+              
+          }
+        })
+        .catch(err => {});
     },
-    methods:{
-        query(list){
-           let para = {
-               createDate:list.ads1,
-               planName:list.ads2,
-               adrId:list.ads3
-           }
-           reqQuery(para).then(res=>{
-
-           }).catch(()=>{
-
-           })
-        },
-        CurrentChanges(currentPage,pageSize){
-           this.totals.currentPage=currentPage;
-           this.totals.pageSize=pageSize;
-
-        }
-    },
-    components:{
-        query,
-        paging
+    CurrentChanges(currentPage, pageSize) {
+      this.totals.currentPage = currentPage;
+      this.totals.pageSize = pageSize;
+      this.query();
     }
-}
+  },
+  components: {
+    query,
+    paging
+  }
+};
 </script>
 <style>
-
-  
 </style>
 
 

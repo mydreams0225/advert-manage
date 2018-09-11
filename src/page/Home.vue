@@ -291,6 +291,7 @@ export default {
           console.log(data);
            _this.sysUserName = data.data.username || "测试";
            window.localStorage.setItem("username",data.data.username)
+           window.localStorage.setItem("userId",data.data.userId);
           // this.sysUserAvatar = user.avatar || "";
         }
 

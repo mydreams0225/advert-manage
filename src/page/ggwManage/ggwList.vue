@@ -242,12 +242,12 @@ export default {
           { required: true, message: "请选择广告位类别", trigger: "change" }
         ]
       },
-      username: "",
+      userId: "",
       token: ""
     };
   },
   mounted() {
-    this.username = window.localStorage.getItem("username");
+    this.userId = window.localStorage.getItem("userId");
     this.token = window.localStorage.getItem("token");
     this.query();
   },
@@ -261,7 +261,7 @@ export default {
         currentPage: this.totals.currentPage,
         pageSize: this.totals.pageSize,
         token: this.token,
-        userId: this.username
+        userId: this.userId
       };
 
       reqGGWList(para)
@@ -427,7 +427,7 @@ export default {
               ratemode: list.feeMethod //计费方式
             },
             token: _this.token,
-            userId: _this.username
+            userId: _this.userId
           };
           if (_this.dialog.title === "添加广告位") {
             // 添加请求
