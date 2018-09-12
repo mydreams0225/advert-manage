@@ -63,53 +63,80 @@
     </section>
 </template>
 <script>
-import query from '@/components/queryArea/queryTask'
-import paging from '@/components/common/paging'
+import query from "@/components/queryArea/queryTask";
+import paging from "@/components/common/paging";
+import { reqQuery } from "@/api/padingTask/secondAudit";
 export default {
-    data(){
-        return{
-           areas:{
-                ad1:"创建日期",
-                ad2:"计划名称",
-                ad3:"广告主编号"
-            },
-            totals:{
-                totalNum:0,
-                currentPage:1,
-                pageSize:10
-            },
-            tableLoading:false,
-            List:[]
-        }
+  data() {
+    return {
+      areas: {
+        ad1: "创建日期",
+        ad2: "计划名称",
+        ad3: "广告主编号"
+      },
+      totals: {
+        totalNum: 0,
+        currentPage: 1,
+        pageSize: 10
+      },
+      tableLoading: false,
+      List: []
+    };
+  },
+  mounted(){
+    this.query();
+  },
+  methods: {
+    query(list) {
+      let _this = this;
+       list = list || {};
+      let para = {
+        createDate: list.ads1,
+        planName: list.ads2,
+        adrId: list.ads3,
+        currentPage: this.totals.currentPage,
+        pageSize: this.totals.pageSize,
+        token: window.localStorage.getItem("token")
+      };
+      reqQuery(para)
+        .then(res => {
+          _this.List = [];
+          debugger
+          if (res.status === 200) {
+            let arr = res.data.list;
+            arr && arr.length > 0 ? _this.loopItem(arr) : "";
+            _this.totals.totalNum = res.data.totalNum;
+          }
+        })
+        .catch(() => {});
     },
-    methods:{
-        query(list){
-           let para = {
-               createDate:list.ads1,
-               planName:list.ads2,
-               adrId:list.ads3
-           }
-           reqQuery(para).then(res=>{
+    loopItem(arr) {
+      arr.forEach(item => {
+        let temp = {
+          planName: item.planname,
+          planId: item.spreadplannum,
+          adType: item.adverttype,
+          dayBudget: item.todaybudget,
+          createDate: item.createdate,
+          approvalStatus: item.checkstatus
 
-           }).catch(()=>{
-
-           })
-        },
-        CurrentChanges(currentPage,pageSize){
-           this.totals.currentPage=currentPage;
-           this.totals.pageSize=pageSize;
-
-        }
+        };
+        this.List.push(temp);
+      });
     },
-    components:{
-        query,
-        paging
+    CurrentChanges(currentPage, pageSize) {
+      this.totals.currentPage = currentPage;
+      this.totals.pageSize = pageSize;
+      this.query();
     }
-}
+  },
+  components: {
+    query,
+    paging
+  }
+};
 </script>
 <style>
-
-  
 </style>
 
 

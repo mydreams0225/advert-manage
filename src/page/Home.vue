@@ -160,7 +160,11 @@ export default {
     handleclose() {
       console.log("handleclose");
     },
-    handleselect: function(a, b) {},
+    handleselect: function(a, b) {
+   
+      debugger
+      console.log( this.$route.matched);
+    },
     //退出登录
     logout: function() {
       var para = {
@@ -245,6 +249,7 @@ export default {
       if (data) {
         //这里是防止用户手动刷新页面，整个app要重新加载,动态新增的路由，会消失，所以我们重新add一次
         let routes = [];
+        debugger
         MenuUtils(routes, data, false);
         this.$router.addRoutes(routes);
       }

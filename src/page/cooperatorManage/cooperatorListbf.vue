@@ -3,12 +3,11 @@
         <div class="parent">
             <div class="margin-tops">
                  <el-button 
-                     type="success" 
-                     size="medium" 
-                     class="el-icon-plus" 
-                     @click="addAdvertList">添加
-                  </el-button>
-                 <query :area = "areas" @querys = "queryAdvertList"></query>  
+                 type="success" 
+                 size="medium" 
+                 class="el-icon-plus" 
+                 @click="addAdvertList">添加</el-button>
+                 <query :area = "areas" @querys = "queryPatternList"></query>  
             </div>
             <div class="margin-tops">
                  <el-table
@@ -27,7 +26,7 @@
                       align="center">
                     </el-table-column>
                     <el-table-column
-                    prop="userRealName"
+                    prop="advertName"
                     label="姓名"
                     align="center">
                     </el-table-column>
@@ -42,12 +41,12 @@
                     align="center">
                     </el-table-column>
                     <el-table-column
-                    prop="statusName"
+                    prop="status"
                     label="状态"
                     align="center">
                     </el-table-column>
                     <el-table-column
-                    prop="identityName"
+                    prop="identity"
                     label="身份"
                     align="center">
                     </el-table-column>
@@ -59,7 +58,7 @@
                             <template slot-scope="scope">
                                 <el-button @click="handleClick(scope.row)" type="primary" size="mini" class="el-icon-edit"></el-button>
                                 <el-button
-                                @click.native.prevent="deleteRow(scope.$index, scope.row.userName)"
+                                @click.native.prevent="deleteRow(scope.$index, scope.row.advertId)"
                                 type="danger"
                                 class="el-icon-error"
                                 size="mini">
@@ -73,29 +72,20 @@
             </div>
             <div class="advertList">
                 <el-dialog
-                     :title="dialog.title"
+                    :title="dialog.title"
                     :visible.sync="dialog.dialogVisible"
                     :close-on-click-modal="false"
                     width="800px"
                     >
                     <el-form label-position="right" label-width="160px" :model="dialog.list" :rules="rules" ref="dialog.list">
-                       <el-form-item label="姓名：" prop="userRealName">
-                          <el-input v-model="dialog.list.userRealName"></el-input>
+                       <el-form-item label="姓名：" prop="advertName">
+                          <el-input v-model="dialog.list.advertName"></el-input>
                        </el-form-item>
                        <el-form-item label="用户名：" prop="userName">
                           <el-input v-model="dialog.list.userName"></el-input>
                        </el-form-item>
                        <el-form-item label="密码：" prop="pwd">
                           <el-input v-model="dialog.list.pwd"></el-input>
-                       </el-form-item>
-                       <el-form-item label="身份：" prop="identity">
-                          <!-- <el-input v-model="dialog.rechargeData.identity"></el-input> -->
-                          <el-select v-model="dialog.list.identity">
-                              <el-option v-for="item in config.identity" 
-                              :key="item.value"
-                              :label="item.label"
-                              :value="item.value"></el-option>
-                          </el-select>
                        </el-form-item>
                        <el-form-item label="邮箱：">
                           <el-input v-model="dialog.list.email"></el-input>
@@ -124,11 +114,15 @@
 import query from "@/components/queryArea/queryList"; // 查询
 import paging from "@/components/common/paging.vue";
 import {
-  reqAdvertList,
-  reqAddAdvertList,
-  reqEditAdvertList,
-  reqRemoveAdvertisters
-} from "@/api/advertManage/advertList";
+  reqPatternList,
+  reqAddPatternList,
+  reqEditPatternList,
+  reqRemovePattern
+  // reqAdvertList,
+  // reqAddAdvertList,
+  // reqEditAdvertList,
+  // reqRemoveAdvertisters
+} from "@/api/patternManage/patternList";
 export default {
   data() {
     return {
@@ -150,16 +144,11 @@ export default {
       dialog: {
         loading: false,
         dialogVisible: false,
-        list: {
-          
+        list: {        
         }
       },
-      config:{
-        identity:configs.identity
-      },
-     
       rules: {
-        userRealName: [
+        advertName: [
           { required: true, message: "请输入姓名", trigger: "blur" }
         ],
         userName: [
@@ -170,66 +159,68 @@ export default {
       }
     };
   },
-    mounted(){
-      this.queryAdvertList();
+  mounted(){
+      this.queryPatternList();
   },
   methods: {
     // 查询
-    queryAdvertList(identity, name) {
-      var identitys = window.localStorage.getItem("identitys");
-      identitys = identitys == 0 ? "" : identitys;
+    queryPatternList(identity, name) {
       var _this = this;
       this.tableLoading = true;
-      this.filters.identity = identity;
-      this.filters.name = name;
+      var identitys = window.localStorage.getItem("identitys");
+      identitys = identitys == 0 ? "" : identitys;
+      // this.filters.identity = identity;
+      // this.filters.name = name;
       let para = {
-        identity:identitys, // 广告主身份
-        name: this.filters.name, // 
+        identity: identitys, // 广告主身份
+        name: name, //
         currentPage: this.totals.currentPage,
         pageSize: this.totals.pageSize,
         token: window.localStorage.getItem("token")
       };
       // 发送请求
-      reqAdvertList(para).then(res => {
+      reqPatternList(para).then(res => {
         if (res.status === 200) {
           _this.advertListData = [];
-          let list = res.data.data;
-          list && list.length>0 ? _this.loopItem(list) : "";
-          debugger
+          let list = res.list;
+          this.loopItemQ(list);
           _this.totals.totalNum = res.data.totalNum; //总条数
           this.tableLoading = false;
         } else if (res.status === 202) {
           _this.common.tokenCheck(_this);
           this.tableLoading = false;
         }
-      }).catch(err=>{
-        _this.$message.error("请求超时，请重新发送请求");
-        this.tableLoading=false;
-        return false;
+      }).catch(()=>{
+        this.tableLoading = false;
+        _this.$message.error("请求超时，请重新发送请求")
       });
     },
-    loopItem(list){
+    loopItemQ(list){
        list.forEach(item => {
-         var identityNames = "";
+          var identityNames="";
             if(item.deptId){
               
                this.config.identity.forEach(items=>{
-                 if(items.value === item.deptId){
-                     identityNames = items.label;
+                 if(items.value===item.deptId){
+                     identityNames=items.label;
                  }
                })
             }//
-           var statusNames= item.status && iitem.status !== "1" ? "禁用" : "启用"
+           var statusNames="";
+            if(item.status==="1"){
+              statusNames="启用"
+            }else if(item.status==="2"){
+              statusNames="禁用"
+            }
             let temp = {
-              userRealName: item.userRealName,
+              advertName: item.userRealName,
               userName: item.account,
               email:item.email,
-              identityName:identityNames,
               status:item.status,
-              identity:item.identity,
-              statusName:item.statusName,
-              status:item.status,
-              role:item.roleIds
+              identity:item.deptId,
+              role:item.roleIds,
+              statusName:statusNames,
+              identityName:identityNames
             };
             this.advertListData.push(temp);
           });
@@ -250,7 +241,7 @@ export default {
     },
     // 提交
     submit(formName) {
-         this.dialog.loading = true;
+     this.dialog.loading = true;
       var _this = this;
       this.$refs[formName].validate(valid => {
         if (valid) {
@@ -269,7 +260,7 @@ export default {
           };
           if (list.title === "添加用户") {
             // 添加请求
-            reqAddAdvertList(para).then(res => {
+            reqAddPatternList(para).then(res => {
               if (res.status === 200) {
                 this.$message({
                   message: "添加成功",
@@ -279,19 +270,20 @@ export default {
                 _this.common.tokenCheck(_this);
               }
                _this.dialog.loading = false;
+               this.queryPatternList();
             }).catch(err => {
-              _this.dialog.loading = false;
               _this.$message.error("请求超时，请重新发送请求");
               return false;
-            });;
+            });
           } else {
             // 修改请求
-            reqEditAdvertList(para).then(res => {
+            reqEditPatternList(para).then(res => {
               if (res.status === 200) {
                 this.$message({
                   message: "修改成功",
                   type: "success"
                 });
+                this.queryPatternList();
               } else if (res.status === 202) {
                 _this.common.tokenCheck(_this);
                 
@@ -301,7 +293,7 @@ export default {
               _this.$message.error("请求超时，请重新发送请求");
               _this.dialog.loading = false;
               return false;
-            });;
+            });
           }
         } else {
           _this.$message.error("请完善必填项信息");
@@ -321,12 +313,13 @@ export default {
             shopno: id, //门店编号
             token: window.localStorage.getItem("token")
           };
-          reqRemoveAdvertisters(para).then(res => {
+          reqRemovePattern(para).then(res => {
             if (res.status === 200) {
               this.$message({
                 message: "删除成功",
                 type: "success"
               });
+              this.queryPatternList();
             } else if (res.status === 202) {
               _this.common.tokenCheck(_this);
             }
@@ -343,7 +336,7 @@ export default {
     CurrentChanges(currentPage, pageSize) {
       this.totals.currentPage = currentPage;
       this.totals.pageSize = pageSize;
-      // this.queryRecharge(this.filters.advertisterName);
+      this.queryPatternList();
     }
   },
   components: {

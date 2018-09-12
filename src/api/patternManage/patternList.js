@@ -4,7 +4,7 @@ import qs from 'qs';
 let base = configs.base;
 //reqPatternList
 export const reqPatternList = params => {
-    return $axios.post(`${base}/team/shop/get`,
+    return $axios.post(`${base}/tm/list`,
         qs.stringify(params, { indices: false }),
         {  // 这里是跨域写法  
             headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", }  // 这里是跨域的写法  

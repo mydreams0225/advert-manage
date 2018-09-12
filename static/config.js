@@ -20,7 +20,7 @@ const configs = {
     // sy   base: "http://192.168.0.105:8081/park",
     //pf
     login: "http://192.168.0.112:8088",
-    base: "http://192.168.0.112:8091",
+    base: "http://192.168.0.112:8092",
     //地区
     options: [
         {
@@ -14809,7 +14809,12 @@ const configs = {
         { value: "01", label: "停车场" },
         { value: "02", label: "APP应用" }
     ],
-
+    identity: [
+        { value: "0", label: "管理中心" },
+        { value: "1", label: "合作商" },
+        { value: "2", label: "广告主" },
+        { value: "3", label: "代理商" }
+    ],
     feeMethod: [{ value: "CPM", label: "CPM" },
     { value: "CPC", label: "CPC" }, { value: "CPT", label: "CPT" }],
     auditStatus: [

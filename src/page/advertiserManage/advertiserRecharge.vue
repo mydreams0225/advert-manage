@@ -138,12 +138,12 @@ export default {
         .then(res => {
           if (res.status === 200) {
             _this.rechargeData = [];
-            let list = res.list;
+            let list = res.data.list;
             list.forEach(item => {
               let temp = {
-                advertId: item.advertId,
-                rechargeAmount: item.rechargeAmount,
-                advertName:item.advertNamepf,
+                advertId: item.userId,
+                rechargeAmount: item.balance,
+                advertName: item.username
               };
               _this.rechargeData.push(temp);
             });
@@ -156,7 +156,7 @@ export default {
         })
         .catch(err => {
           _this.$message.error("请求超时，请重新发送请求");
-         this.tableLoading = false;
+          this.tableLoading = false;
           return false;
         });
     },
@@ -176,26 +176,29 @@ export default {
       var _this = this;
       this.$refs[formName].validate(valid => {
         if (valid) {
-          let para = {
-            advertId: _this.dialog.rechargeData.advertId,
-            rechargeAmount: _this.dialog.rechargeData.rechargeAmount,
+          let para = { 
+            params: {
+              advertisernum: _this.dialog.rechargeData.advertId,
+              rechargeamt: _this.dialog.rechargeData.rechargeAmount
+            },
             token: window.localStorage.getItem("token")
           };
           this.dialog.loading = true;
           // 发送请求
           reqAddRecharge(para)
             .then(res => {
+              debugger
               if (res.status === 200) {
                 this.$message({
                   message: "充值成功",
                   type: "success"
                 });
+                this.dialog.dialogVisible=false;
                 this.queryRecharge();
               } else if (res.status === 202) {
                 _this.common.tokenCheck(_this);
-                _this.dialog.loading = false;
               }
-               
+              _this.dialog.loading = false;
             })
             .catch(err => {
               _this.$message.error("请求超时，请重新发送请求");

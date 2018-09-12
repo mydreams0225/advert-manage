@@ -20,6 +20,7 @@
                     <el-table-column
                     prop="rechargeFlowId"
                     label="充值流水编号"
+                    width="200"
                     align="center">
                     </el-table-column>
                     <el-table-column
@@ -37,7 +38,7 @@
                     label="充值时间"
                     align="center">
                     </el-table-column>
-                    <el-table-column
+                    <!-- <el-table-column
                             fixed="right"
                             label="操作"
                             align="center"
@@ -50,7 +51,7 @@
                                 size="mini">
                                 </el-button>
                             </template>
-                     </el-table-column>
+                     </el-table-column> -->
                 </el-table>
             </div>
             <div class="margin-tops">
@@ -91,25 +92,28 @@ export default {
       //     rechargeDate: ""
       //   }
       // ];
+      debugger
       let para = {
         pageSize: this.totals.pageSize,
         currentPage: this.totals.currentPage,
-
+        userId:window.localStorage.getItem("userId"),
         token: window.localStorage.getItem("token")
       };
       _this.tableLoading = true;
       reqRechargeList(para)
         .then(res => {
-          this.list=[];
+          debugger
+          this.List=[];
           if (res.status === 200) {
-               let list = res.list;
-              list.lenght!==0 || list !=null ? loopItemQ(list) :"";
+               let list = res.data.list;
+              list.lenght!==0 && list !=null ? _this.loopItemQ(list) :"";
+              _this.totals.totalNum = res.data.totalNum
           } else if (res.status === 202) {
             _this.common.tokenCheck(_this);
           }
           _this.tableLoading= false;
         })
-        .catch(() => {
+        .catch(err => {
           _this.$message.error("请求超时，请重新发送请求");
           _this.tableLoading = false;
           return false;
@@ -118,9 +122,12 @@ export default {
     loopItemQ(list){
          list.forEach(item=>{
            var temp ={
-
+               rechargeFlowId:item.rechargenum,
+               adrId:item.advertisernum,
+               rechargeMoney:item.rechargeamt,
+               rechargeDate:item.createtime
            };
-           this.list.push(temp);
+           this.List.push(temp);
          })
     },
     deleteRow(rechargeFlowId) {

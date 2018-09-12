@@ -65,7 +65,7 @@
 <script>
 import query from "@/components/queryArea/queryTask";
 import paging from "@/components/common/paging";
-import { reqQuery } from "@/api/padingTask/adPlanAudit";
+import { reqQuery } from "@/api/padingTask/firstAudit";
 export default {
   data() {
     return {
@@ -83,8 +83,13 @@ export default {
       List: []
     };
   },
+  mounted(){
+    this.query();
+  },
   methods: {
     query(list) {
+      var _this = this;
+      list = list || {}
       let para = {
         token: window.localStorage.getItem("token"),
         createDate: list.ads1,
@@ -95,11 +100,29 @@ export default {
       };
       reqQuery(para)
         .then(res => {
-          if (res.status === 200) {
-              
-          }
+          debugger
+          _this.List = [];
+          if(res.status === 200){
+               let arr = res.data.list;
+               arr && arr.length>0 ? _this.loopItem(arr) : "";
+               _this.totals.totalNum = res.data.totalNum;
+            }
         })
         .catch(err => {});
+    },
+    loopItem(arr){
+       arr.forEach(item => {
+            let temp = {
+                planName:item.planname,
+                planId:item.spreadplannum,
+                adType:item.adverttype,
+                dayBudget:item.todaybudget,
+                createDate:item.createdate,
+                approvalStatus:item.checkstatus
+
+            }
+            this.List.push(temp);
+       });
     },
     CurrentChanges(currentPage, pageSize) {
       this.totals.currentPage = currentPage;

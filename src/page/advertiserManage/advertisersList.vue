@@ -27,7 +27,7 @@
                       align="center">
                     </el-table-column>
                     <el-table-column
-                    prop="advertName"
+                    prop="userRealName"
                     label="姓名"
                     align="center">
                     </el-table-column>
@@ -79,8 +79,8 @@
                     width="800px"
                     >
                     <el-form label-position="right" label-width="160px" :model="dialog.list" :rules="rules" ref="dialog.list">
-                       <el-form-item label="姓名：" prop="advertName">
-                          <el-input v-model="dialog.list.advertName"></el-input>
+                       <el-form-item label="姓名：" prop="userRealName">
+                          <el-input v-model="dialog.list.userRealName"></el-input>
                        </el-form-item>
                        <el-form-item label="用户名：" prop="userName">
                           <el-input v-model="dialog.list.userName"></el-input>
@@ -159,7 +159,7 @@ export default {
       },
      
       rules: {
-        advertName: [
+        userRealName: [
           { required: true, message: "请输入姓名", trigger: "blur" }
         ],
         userName: [
@@ -176,12 +176,14 @@ export default {
   methods: {
     // 查询
     queryAdvertList(identity, name) {
+      var identitys = window.localStorage.getItem("identitys");
+      identitys = identitys == 0 ? "" : identitys;
       var _this = this;
       this.tableLoading = true;
       this.filters.identity = identity;
       this.filters.name = name;
       let para = {
-        identity: this.filters.identity, // 广告主身份
+        identity:identitys, // 广告主身份
         name: this.filters.name, // 
         currentPage: this.totals.currentPage,
         pageSize: this.totals.pageSize,
@@ -190,16 +192,17 @@ export default {
       // 发送请求
       reqAdvertList(para).then(res => {
         if (res.status === 200) {
+          debugger
           _this.advertListData = [];
-          let list = res.list;
-          loopItem(list);
-          _this.totals.totalNum = res.data.totalNum; //总条数
+          let list = res.data.list.data;
+          list && list.length>0 ? _this.loopItem(list) : "";
+          _this.totals.totalNum = parseInt(res.data.totalNum) ; //总条数
           this.tableLoading = false;
         } else if (res.status === 202) {
           _this.common.tokenCheck(_this);
           this.tableLoading = false;
         }
-      }).catch(()=>{
+      }).catch(err=>{
         _this.$message.error("请求超时，请重新发送请求");
         this.tableLoading=false;
         return false;
@@ -207,28 +210,28 @@ export default {
     },
     loopItem(list){
        list.forEach(item => {
-         var identityNames="";
-            if(item.identity){
+         var identityNames = "";
+            if(item.deptId){
               
-               this.config.identity.forEach(item=>{
-                 if(item.value===item.identity){
-                     identityNames=item.label;
+               this.config.identity.forEach(items=>{
+                 if(items.value === item.deptId){
+                     identityNames = items.label;
                  }
                })
             }//
            var statusNames= item.status && iitem.status !== "1" ? "禁用" : "启用"
             let temp = {
-              advertName: item.advertName,
-              userName: item.userName,
+              userRealName: item.userRealName,
+              userName: item.account,
               email:item.email,
               identityName:identityNames,
               status:item.status,
               identity:item.identity,
               statusName:item.statusName,
               status:item.status,
-              role:item.role
+              role:item.roleIds
             };
-            _this.advertListData.push(temp);
+            this.advertListData.push(temp);
           });
     },
     // open编辑

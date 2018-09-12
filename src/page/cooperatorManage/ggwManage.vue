@@ -61,7 +61,7 @@
                     align="center">
                     </el-table-column>
                     <el-table-column
-                    prop="status"
+                    prop="statusName"
                     label="状态"
                     align="center">
                     </el-table-column>
@@ -72,7 +72,7 @@
                              width="250px">
                             <template slot-scope="scope">
                                 <el-button
-                                @click.native.prevent="prentName(scope.$index, scope.row.status)"
+                                @click.native.prevent="prentName(scope.$index, scope.row.uuid,scope.row.statusName)"
                                 type="primary"
                                 
                                 size="mini">
@@ -92,7 +92,7 @@
 <script>
 import query from "@/components/queryArea/query2";
 import paging from "@/components/common/paging";
-import  {reqGgwManage,reqStatus} from '@/api/patternManage/ggwManage'
+import  {reqGgwManage,reqStatusU,reqStatusT} from '@/api/patternManage/ggwManage'
 export default {
   data() {
     return {
@@ -109,22 +109,28 @@ export default {
       list: [{}]
     };
   },
+  mounted(){
+    this.query();
+  },
   methods: {
     query(planId, ggwId) {
         debugger
       var _this = this;
       let para = {
-        planId: planId,
-        ggwId: ggwId,
+        spreadplannum: planId,
+        advertpositionnum: ggwId,
         pageSize: this.totals.pageSize,
         currentPage: this.totals.currentPage,
         token: window.localStorage.getItem("token")
       };
+      
       reqGgwManage(para)
         .then(res => {
+          this.list = [];
           if (res.status === 200) {
-            var list = res.list;
-            list.length !== 0 ? loopItem(list) : "";
+            var list = res.data.list;
+           list &&  list.length !== 0 ? _this.loopItem(list) : "";
+           _this.totals.totalNum = res.data.totalNum;
           } else if (res.status === 202) {
             _this.common.tokenCheck(_this);
           }
@@ -139,22 +145,23 @@ export default {
     loopItem(list){
         list.forEach(item => {
             var statusName=""
-            if(item.status==="1"){
+            if(item.status==="0"){
+                statusName="停用"
+            }else if(item.status==="1"){
                 statusName="启用"
-            }else if(item.status==="2"){
-                statusName="禁用"
             }
             var temp ={
-               ggwId: item.ggwId,
-               planId:item.planId,
-               planName:item.planName,
-               patternId:item.patternId,
-               patternName:item.patternName,
-               adrId:item.adrId,
-               adrName:item.adrName,
-               adEleId:item.adEleId,
+               ggwId: item.advertpositionnum,
+               planId:item.spreadplannum,
+               planName:item.planname,
+               patternId:item.partnernum,
+               patternName:item.partnername,
+               adrId:item.advertisernum,
+               adrName:item.advertisername,
+               adEleId:item.advertelenum,
                status:item.status,
-               statusName:item.statusName
+               statusName:statusName,
+               uuid:item.uuid
             }
             this.list.push(temp);
         });
@@ -164,13 +171,32 @@ export default {
       this.totals.pageSize = pageSize;
       this.query();
     },
-    prentName(index, status) {
+    prentName(index, uuid,status) {
+      var _this = this;
+      debugger
        let para = {
-        status: status,
-        id:id,
+        uuid: uuid,
         token:window.localStorage.getItem("token")
       };
-      reqStatus(para).then(res=>{
+       status === "停用" && this.reqStatusUsed(para);
+       status === "启用" && this.reqStatusStop(para);
+    },
+    reqStatusUsed(para){
+        reqStatusU(para).then(res=>{
+        if(res.status===200){
+           this.query();
+        }else if(res.status===202){
+             _this.common.tokenCheck(_this);
+            this.tableLoading = false;
+        }
+      }).catch(()=>{
+           _this.$message.error("请求超时，请重新发送请求");
+          this.tableLoading = false;
+          return false;
+      })  
+    },
+    reqStatusStop(para){
+      reqStatusT(para).then(res=>{
         if(res.status===200){
            this.query();
         }else if(res.status===202){

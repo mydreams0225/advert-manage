@@ -3,7 +3,7 @@ import qs from 'qs';
 let base = configs.base;
 // 1、查询广告主列表 reqAdvertList  
 export const reqAdvertList = params => {
-    return $axios.post(`${base}/team/shop/get`,
+    return $axios.post(`${base}/tm/list`,
         qs.stringify(params, { indices: false }),
         {  // 这里是跨域写法  
             headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", }  // 这里是跨域的写法  

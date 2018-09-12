@@ -20,18 +20,13 @@
                       align="center">
                     </el-table-column>
                     <el-table-column
-                    prop="planName"
-                    label="计划名称"
+                    prop="adName"
+                    label="广告位名称"
                     align="center">
                     </el-table-column>
                     <el-table-column
                     prop="adType"
                     label="广告类型"
-                    align="center">
-                    </el-table-column>
-                    <el-table-column
-                    prop="dayBudget"
-                    label="当日预算"
                     align="center">
                     </el-table-column>
                     <el-table-column
@@ -137,7 +132,7 @@ export default {
         },
       areas: {
         ad1: "创建日期",
-        ad2: "计划名称",
+        ad2: "名称",
         ad3: "广告主编号"
       },
       totals: {
@@ -157,16 +152,25 @@ export default {
       }
     };
   },
+  mounted(){
+      this.query()
+  },
   methods: {
     query(list) {
+        var list = list || {};
+        debugger
         let _this = this;
       let para = {
         createDate: list.ads1,
         planName: list.ads2,
-        adrId: list.ads3
+        partnernum: list.ads3,
+        currentPage:this.totals.currentPage,
+        pageSize:this.totals.pageSize,
+        token: window.localStorage.getItem("token")
       };
       reqQuery(para)
         .then(res => {
+            _this.List=[];
             if(res.status === 200){
                let arr = res.data.list;
                arr && arr.length>0 ? _this.loopItem(arr) : "";
@@ -178,18 +182,20 @@ export default {
     loopItem(arr){
        arr.forEach(item => {
             let temp = {
-                planName:item.planname,
+                adName:item.advertpositionnam,
                 planId:item.spreadplannum,
-                adType:item.spreadenddate,
+                adType:item.adverttype,
                 dayBudget:item.todaybudget,
-                createDate:"",
-                approvalStatus:item.checkstatus
+                createDate:item.createdate,
+                approvalStatus:item.auditStatus
             }
+            this.List.push(temp);
        });
     },
     CurrentChanges(currentPage, pageSize) {
       this.totals.currentPage = currentPage;
       this.totals.pageSize = pageSize;
+      this.query();
     },
     // 打开审核页面 
     openApprovalStatus(row) {
