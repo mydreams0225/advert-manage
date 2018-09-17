@@ -179,7 +179,7 @@
 <script>
 import query from "@/components/queryArea/query1.vue";
 import paging from "@/components/common/paging";
-import QRCodes from "qrcode";
+// import QRCodes from "qrcode";
 import {
   reqAddggw,
   reqGGWList,
