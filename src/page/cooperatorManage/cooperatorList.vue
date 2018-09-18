@@ -177,7 +177,7 @@ export default {
     // 查询
     queryAdvertList(identity, name) {
       var identitys = window.localStorage.getItem("identitys");
-      identitys = identitys == 0 ? "" : identitys;
+      identitys = identitys == 0 ? "1" : identitys;
       var _this = this;
       this.tableLoading = true;
       this.filters.identity = identity;
@@ -193,7 +193,7 @@ export default {
       reqAdvertList(para).then(res => {
         if (res.status === 200) {
           _this.advertListData = [];
-          let list = res.data.data;
+          let list = res.data.list.data;
           list && list.length>0 ? _this.loopItem(list) : "";
           debugger
           _this.totals.totalNum = res.data.totalNum; //总条数

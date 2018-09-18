@@ -177,7 +177,7 @@ export default {
     // 查询
     queryAdvertList(identity, name) {
       var identitys = window.localStorage.getItem("identitys");
-      identitys = identitys == 0 ? "" : identitys;
+      identitys = identitys == 0 ? "2" : identitys;
       var _this = this;
       this.tableLoading = true;
       this.filters.identity = identity;
